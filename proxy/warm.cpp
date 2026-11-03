@@ -1398,6 +1398,13 @@ static int parent(int argc, wchar_t** argv, bool vulkan) {
     HANDLE loading = CreateEventW(nullptr, TRUE, FALSE, loading_name(me).c_str());  // set while the child reads the dbs
     // still unset when the child dies: the loader or the CRT ended it before our code, as a setting keyed on the exe name can
     HANDLE entered = CreateEventW(nullptr, TRUE, FALSE, entered_name(me).c_str());
+    // CrossOver on macOS loads its own d3d12 even by the proxy's full path, and a WINEDLLOVERRIDES set here doesn't reach the
+    // child (measured): this key does. It stays: a game with no d3d12.dll beside it still gets the builtin
+    if (wine_on_mac()) {
+        const std::wstring key = L"Software\\Wine\\AppDefaults\\" + exe + L"\\DllOverrides";
+        const wchar_t order[] = L"native,builtin";
+        RegSetKeyValueW(HKEY_CURRENT_USER, key.c_str(), L"d3d12", REG_SZ, order, sizeof order);
+    }
     // ReShade reads these before the child runs: RESHADE_BASE_PATH_OVERRIDE would load its config and add-ons from elsewhere
     if (wchar_t* env = GetEnvironmentStringsW()) {
         std::vector<std::wstring> reshade;

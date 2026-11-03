@@ -3,6 +3,18 @@
 // retry the process couldn't print.
 #pragma once
 #include <cstdint>
+#include <cstring>
+
+#ifdef _WIN32
+// Wine on a macOS host (CrossOver): Windows' ntdll never exports it, and Proton's host is Linux.
+inline bool wine_on_mac() {
+    auto host = (void(__cdecl*)(const char**, const char**))GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "wine_get_host_version");
+    const char* sysname = nullptr;
+    const char* release = nullptr;
+    if (host) host(&sysname, &release);
+    return sysname && !strcmp(sysname, "Darwin");
+}
+#endif
 
 constexpr wchar_t kItemsFile[] = L"scskiller_items.bin";
 constexpr uint64_t kItemsMagic = 0x31534D4554494B53;  // "SKITEMS1"

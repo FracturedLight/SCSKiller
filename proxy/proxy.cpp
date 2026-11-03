@@ -1847,9 +1847,14 @@ static HANDLE g_rt_sem;              // g_rt_threads at a time; nullptr = no lim
 static std::atomic<uint64_t> g_released, g_release_batches;
 
 // the commit charge, as PrivateUsage is on Windows: Wine reports PrivateUsage as 0 and this as the anonymous resident memory
+// CrossOver on macOS: it reads ~42 GB from the start, on 18 GB of RAM with the process resident at under 100 MB (measured),
+// so there the budget and the 60% bound see the growth from the first reading
 static double private_mb() {
     PROCESS_MEMORY_COUNTERS m{sizeof m};
-    return K32GetProcessMemoryInfo(GetCurrentProcess(), &m, sizeof m) ? m.PagefileUsage / 1048576.0 : 0;
+    if (!K32GetProcessMemoryInfo(GetCurrentProcess(), &m, sizeof m)) return 0;
+    const double mb = m.PagefileUsage / 1048576.0;
+    static const double base = wine_on_mac() ? mb : 0;
+    return std::max(0.0, mb - base);
 }
 
 // SCSKILLER_WARM_RELEASE_HANG=1 (development): one more state object at the end of the warm, whose Release never returns

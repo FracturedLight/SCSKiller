@@ -1,0 +1,26 @@
+# The native files of this fork's CrossOver changes, built on a clean Windows runner. They replace current\native\ of the
+# same version's portable release: the C# app is unchanged.
+name: crossover-native
+
+on:
+  push:
+    branches: [crossover-macos]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    # VS 2022 (MSVC x64, MASM, Windows SDK) and CMake: preinstalled on windows-2025
+    runs-on: windows-2025
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+      - run: .\build\publish.ps1 -NativeOnly -Version 1.4.4
+        shell: pwsh
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a   # v7.0.1
+        with:
+          name: scskiller-native-crossover
+          path: dist/SCSKiller/native
+          if-no-files-found: error
