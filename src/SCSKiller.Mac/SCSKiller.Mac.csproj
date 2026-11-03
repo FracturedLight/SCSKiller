@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The native macOS front of the CrossOver fork: it runs here, and the Windows CLI and warm it drives run in a bottle,
+       where D3DMetal's cache is filled. It references no Core: Core's net10.0 build is Linux's. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>scskiller-mac</AssemblyName>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+</Project>
